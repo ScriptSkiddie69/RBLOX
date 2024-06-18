@@ -157,8 +157,17 @@ class Client:
         return True
 
     def can_mail(self, id):
-        r = requests.get(f"https://privatemessages.roblox.com/v1/messages/{id}/can-message", headers=headers, cookies={'.ROBLOSECURITY': settings['cookie']})
-        return json.loads(r.text)['canMessage']
+        try:
+            r = requests.get(f"https://privatemessages.roblox.com/v1/messages/{id}/can-message", headers=headers, cookies={'.ROBLOSECURITY': settings['cookie']})
+            r.raise_for_status() 
+            return json.loads(r.text).get('canMessage', False)
+        except requests.RequestException as e:
+            print(f"Request error: {e}")
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+        except KeyError as e:
+            print(f"Key error: {e}")
+        return False
     def name(self):
         print(settings['cookie'])
         r = requests.get("https://users.roblox.com/v1/users/authenticated", headers=headers, cookies={'.ROBLOSECURITY': settings['cookie']})
